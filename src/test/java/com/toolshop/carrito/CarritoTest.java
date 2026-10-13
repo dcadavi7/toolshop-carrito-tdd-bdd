@@ -127,4 +127,30 @@ class CarritoTest {
                     .hasMessageContaining("Hammer");
         }
     }
+
+    @Nested
+    @Tag("HU02-CA04")
+    @DisplayName("HU02-CA04 Un producto agotado no se puede agregar")
+    class ProductoAgotado {
+
+        @Test
+        @DisplayName("agregar un producto sin stock lanza ProductoAgotadoException")
+        void agregarAgotadoLanzaExcepcion() {
+            assertThatThrownBy(() -> carrito.agregar(ALICATE_AGOTADO, 1))
+                    .isInstanceOf(ProductoAgotadoException.class)
+                    .hasMessageContaining("Long Nose Pliers");
+        }
+
+        @Test
+        @DisplayName("si se rechaza un producto agotado, el carrito queda igual")
+        void carritoNoCambiaAlRechazar() {
+            carrito.agregar(LLAVE_AJUSTABLE, 1);
+
+            assertThatThrownBy(() -> carrito.agregar(ALICATE_AGOTADO, 1))
+                    .isInstanceOf(ProductoAgotadoException.class);
+
+            assertThat(carrito.lineas()).hasSize(1);
+            assertThat(carrito.total()).isEqualByComparingTo("20.33");
+        }
+    }
 }
