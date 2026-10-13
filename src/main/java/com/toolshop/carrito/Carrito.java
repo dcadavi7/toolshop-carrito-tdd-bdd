@@ -21,6 +21,9 @@ public class Carrito {
      */
     public void agregar(Producto producto, int cantidad) {
         Objects.requireNonNull(producto, "El producto es obligatorio");
+        if (!producto.estaDisponible()) {
+            throw new ProductoAgotadoException(producto.nombre());
+        }
         LineaCarrito existente = lineas.get(producto.nombre());
         int cantidadActual = existente == null ? 0 : existente.cantidad();
         lineas.put(producto.nombre(), new LineaCarrito(producto, cantidadActual + cantidad));

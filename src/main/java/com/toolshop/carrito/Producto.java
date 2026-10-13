@@ -10,4 +10,9 @@ import java.math.BigDecimal;
  * @param stock           unidades disponibles
  * @param calificacionCo2 calificacion de huella de carbono (A a E)
  */
-public record Producto(String nombre, BigDecimal precio, int stock, String calificacionCo2) {}
+public record Producto(String nombre, BigDecimal precio, int stock, String calificacionCo2) {
+    /** Un producto se puede agregar al carrito solo si tiene existencias. */
+    public boolean estaDisponible() {
+        return stock > 0;
+    }
+}
