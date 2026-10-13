@@ -72,4 +72,34 @@ class CarritoTest {
                     .isInstanceOf(UnsupportedOperationException.class);
         }
     }
+
+    @Nested
+    @Tag("HU02-CA02")
+    @DisplayName("HU02-CA02 Subtotal por linea y total del carrito")
+    class SubtotalYTotal {
+
+        @Test
+        @DisplayName("el subtotal de una linea es precio por cantidad")
+        void subtotalDeLinea() {
+            carrito.agregar(LLAVE_AJUSTABLE, 2);
+
+            assertThat(carrito.lineas().get(0).subtotal()).isEqualByComparingTo("40.66");
+        }
+
+        @Test
+        @DisplayName("el total suma los subtotales de todas las lineas")
+        void totalDeVariasLineas() {
+            carrito.agregar(LLAVE_AJUSTABLE, 2);
+            carrito.agregar(CINTA_METRICA, 3);
+
+            assertThat(carrito.subtotal()).isEqualByComparingTo("79.39");
+            assertThat(carrito.total()).isEqualByComparingTo("79.39");
+        }
+
+        @Test
+        @DisplayName("el total de un carrito vacio es cero con dos decimales")
+        void totalCarritoVacio() {
+            assertThat(carrito.total()).isEqualTo(new BigDecimal("0.00"));
+        }
+    }
 }
