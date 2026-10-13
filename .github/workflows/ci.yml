@@ -10,18 +10,18 @@ on:
 jobs:
   build:
     name: Pruebas, cobertura y calidad
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # version fija para que el entorno no cambie sin aviso
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
       - name: Descargar el codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0   # historial completo para el analisis de SonarCloud
 
       - name: Preparar Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -59,7 +59,7 @@ jobs:
 
       - name: Publicar reportes
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: reportes-de-pruebas
           path: |
