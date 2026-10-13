@@ -1,0 +1,68 @@
+name: CI - TDD + BDD + JaCoCo + SonarCloud
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Pruebas, cobertura y calidad
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historial completo para el analisis de SonarCloud
+
+      - name: Preparar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Pruebas TDD (unitarias, JUnit 5)
+        run: mvn -B -P tdd test
+
+      - name: Pruebas BDD (escenarios Gherkin, Cucumber)
+        run: mvn -B -P bdd test
+
+      - name: Cobertura con JaCoCo (reporte y umbral minimo)
+        run: mvn -B verify -DskipTests
+
+      - name: Resumen de cobertura
+        if: always()
+        run: |
+          CSV=target/site/jacoco/jacoco.csv
+          if [ -f "$CSV" ]; then
+            awk -F, 'NR>1 {lm+=$8; lc+=$9; bm+=$6; bc+=$7}
+              END {
+                printf "### Cobertura JaCoCo\n\n| Metrica | Cubiertas | Total | %% |\n|---|---|---|---|\n"
+                printf "| Lineas | %d | %d | %.1f %% |\n", lc, lc+lm, (lc+lm)?100*lc/(lc+lm):0
+                printf "| Ramas | %d | %d | %.1f %% |\n", bc, bc+bm, (bc+bm)?100*bc/(bc+bm):0
+              }' "$CSV" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Analisis en SonarCloud y quality gate
+        if: env.SONAR_TOKEN != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar
+          -Dsonar.qualitygate.wait=true
+
+      - name: Publicar reportes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-de-pruebas
+          path: |
+            target/site/jacoco/
+            target/cucumber/
+            target/surefire-reports/
