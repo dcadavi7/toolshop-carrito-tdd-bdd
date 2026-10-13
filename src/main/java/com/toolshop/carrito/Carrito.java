@@ -26,6 +26,19 @@ public class Carrito {
         lineas.put(producto.nombre(), new LineaCarrito(producto, cantidadActual + cantidad));
     }
 
+    /**
+     * Reemplaza la cantidad de un producto que ya esta en el carrito (HU02-CA03).
+     *
+     * @throws ProductoNoEnCarritoException si el producto no esta en el carrito
+     */
+    public void cambiarCantidad(String nombreProducto, int cantidad) {
+        LineaCarrito existente = lineas.get(nombreProducto);
+        if (existente == null) {
+            throw new ProductoNoEnCarritoException(nombreProducto);
+        }
+        lineas.put(nombreProducto, new LineaCarrito(existente.producto(), cantidad));
+    }
+
     /** Lineas del carrito, en una lista que no se puede modificar. */
     public List<LineaCarrito> lineas() {
         return List.copyOf(lineas.values());
