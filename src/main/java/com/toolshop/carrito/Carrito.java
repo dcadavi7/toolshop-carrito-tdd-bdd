@@ -12,6 +12,12 @@ import java.util.Objects;
  */
 public class Carrito {
 
+    /** Cantidad minima por linea. Valores menores se ajustan a este minimo. */
+    public static final int CANTIDAD_MINIMA = 1;
+
+    /** Cantidad maxima por linea. Valores mayores se ajustan a este maximo. */
+    public static final int CANTIDAD_MAXIMA = 99;
+
     private static final BigDecimal CERO = BigDecimal.ZERO.setScale(2);
 
     private final Map<String, LineaCarrito> lineas = new LinkedHashMap<>();
@@ -26,7 +32,8 @@ public class Carrito {
         }
         LineaCarrito existente = lineas.get(producto.nombre());
         int cantidadActual = existente == null ? 0 : existente.cantidad();
-        lineas.put(producto.nombre(), new LineaCarrito(producto, cantidadActual + cantidad));
+        int nuevaCantidad = ajustarCantidad(cantidadActual + ajustarCantidad(cantidad));
+        lineas.put(producto.nombre(), new LineaCarrito(producto, nuevaCantidad));
     }
 
     /**
@@ -39,7 +46,7 @@ public class Carrito {
         if (existente == null) {
             throw new ProductoNoEnCarritoException(nombreProducto);
         }
-        lineas.put(nombreProducto, new LineaCarrito(existente.producto(), cantidad));
+        lineas.put(nombreProducto, new LineaCarrito(existente.producto(), ajustarCantidad(cantidad)));
     }
 
     /** Lineas del carrito, en una lista que no se puede modificar. */
@@ -66,5 +73,9 @@ public class Carrito {
     /** Total a pagar. */
     public BigDecimal total() {
         return subtotal();
+    }
+
+    private static int ajustarCantidad(int cantidad) {
+        return Math.clamp(cantidad, CANTIDAD_MINIMA, CANTIDAD_MAXIMA);
     }
 }
