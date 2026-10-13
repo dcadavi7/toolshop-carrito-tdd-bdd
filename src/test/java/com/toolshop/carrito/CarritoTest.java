@@ -188,4 +188,45 @@ class CarritoTest {
             assertThat(carrito.lineas().get(0).cantidad()).isEqualTo(esperada);
         }
     }
+
+    @Nested
+    @Tag("HU02-CA05")
+    @DisplayName("HU02-CA05 Descuento ecologico del 5 %")
+    class DescuentoEcologico {
+
+        @Test
+        @DisplayName("sin productos no hay descuento")
+        void carritoVacioSinDescuento() {
+            assertThat(carrito.descuentoEcologico()).isEqualByComparingTo("0.00");
+        }
+
+        @Test
+        @DisplayName("con exactamente el 50 % de unidades ecologicas no hay descuento")
+        void cincuentaPorCientoSinDescuento() {
+            carrito.agregar(ALICATE_ECOLOGICO, 1);
+            carrito.agregar(LLAVE_AJUSTABLE, 1);
+
+            assertThat(carrito.descuentoEcologico()).isEqualByComparingTo("0.00");
+            assertThat(carrito.total()).isEqualByComparingTo("34.48");
+        }
+
+        @Test
+        @DisplayName("con mas del 50 % de unidades ecologicas se descuenta el 5 % redondeado")
+        void masDeLaMitadConDescuento() {
+            carrito.agregar(ALICATE_ECOLOGICO, 2);
+            carrito.agregar(LLAVE_AJUSTABLE, 1);
+
+            assertThat(carrito.subtotal()).isEqualByComparingTo("48.63");
+            assertThat(carrito.descuentoEcologico()).isEqualByComparingTo("2.43");
+            assertThat(carrito.total()).isEqualByComparingTo("46.20");
+        }
+
+        @Test
+        @DisplayName("solo productos ecologicos reciben el descuento")
+        void soloEcologicos() {
+            carrito.agregar(ALICATE_ECOLOGICO, 1);
+
+            assertThat(carrito.total()).isEqualByComparingTo("13.44");
+        }
+    }
 }
