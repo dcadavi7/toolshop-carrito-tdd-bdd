@@ -102,4 +102,29 @@ class CarritoTest {
             assertThat(carrito.total()).isEqualTo(new BigDecimal("0.00"));
         }
     }
+
+    @Nested
+    @Tag("HU02-CA03")
+    @DisplayName("HU02-CA03 Cambiar la cantidad recalcula el total")
+    class CambiarCantidad {
+
+        @Test
+        @DisplayName("cambiar la cantidad actualiza el subtotal y el total")
+        void cambiarCantidadRecalcula() {
+            carrito.agregar(LLAVE_AJUSTABLE, 1);
+
+            carrito.cambiarCantidad("Adjustable Wrench", 3);
+
+            assertThat(carrito.lineas().get(0).cantidad()).isEqualTo(3);
+            assertThat(carrito.total()).isEqualByComparingTo("60.99");
+        }
+
+        @Test
+        @DisplayName("cambiar la cantidad de un producto que no esta en el carrito es un error")
+        void cambiarProductoInexistente() {
+            assertThatThrownBy(() -> carrito.cambiarCantidad("Hammer", 2))
+                    .isInstanceOf(ProductoNoEnCarritoException.class)
+                    .hasMessageContaining("Hammer");
+        }
+    }
 }
