@@ -1,6 +1,7 @@
 package com.toolshop.carrito;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class Carrito {
 
     /** Cantidad maxima por linea. Valores mayores se ajustan a este maximo. */
     public static final int CANTIDAD_MAXIMA = 99;
+
+    private static final BigDecimal PORCENTAJE_DESCUENTO_ECOLOGICO = new BigDecimal("0.05");
 
     private static final BigDecimal CERO = BigDecimal.ZERO.setScale(2);
 
@@ -70,9 +73,28 @@ public class Carrito {
                 .reduce(CERO, BigDecimal::add);
     }
 
-    /** Total a pagar. */
+    /**
+     * Descuento del 5 % cuando mas de la mitad de las unidades son ecologicas (HU02-CA05).
+     * Con exactamente la mitad no se aplica.
+     */
+    public BigDecimal descuentoEcologico() {
+        int unidades = cantidadTotal();
+        if (unidades == 0) {
+            return CERO;
+        }
+        int unidadesEcologicas = lineas.values().stream()
+                .filter(linea -> linea.producto().esEcologico())
+                .mapToInt(LineaCarrito::cantidad)
+                .sum();
+        boolean masDeLaMitad = unidadesEcologicas * 2 > unidades;
+        return masDeLaMitad
+                ? subtotal().multiply(PORCENTAJE_DESCUENTO_ECOLOGICO).setScale(2, RoundingMode.HALF_UP)
+                : CERO;
+    }
+
+    /** Total a pagar: subtotal menos el descuento ecologico. */
     public BigDecimal total() {
-        return subtotal();
+        return subtotal().subtract(descuentoEcologico());
     }
 
     private static int ajustarCantidad(int cantidad) {

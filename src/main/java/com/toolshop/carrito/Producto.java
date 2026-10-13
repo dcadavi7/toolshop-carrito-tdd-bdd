@@ -15,4 +15,9 @@ public record Producto(String nombre, BigDecimal precio, int stock, String calif
     public boolean estaDisponible() {
         return stock > 0;
     }
+
+    /** En Toolshop, los productos con calificacion CO2 A o B se consideran ecologicos. */
+    public boolean esEcologico() {
+        return "A".equalsIgnoreCase(calificacionCo2) || "B".equalsIgnoreCase(calificacionCo2);
+    }
 }
