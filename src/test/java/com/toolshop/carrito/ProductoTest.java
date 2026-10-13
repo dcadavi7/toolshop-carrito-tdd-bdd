@@ -35,14 +35,15 @@ class ProductoTest {
     @Test
     @DisplayName("no se permiten precios negativos")
     void precioNegativo() {
-        assertThatThrownBy(() -> new Producto("Pliers", new BigDecimal("-1"), 5, "A"))
+        BigDecimal precioNegativo = new BigDecimal("-1");
+        assertThatThrownBy(() -> new Producto("Pliers", precioNegativo, 5, "A"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("no se permite stock negativo")
     void stockNegativo() {
-        assertThatThrownBy(() -> new Producto("Pliers", new BigDecimal("1"), -1, "A"))
+        assertThatThrownBy(() -> new Producto("Pliers", BigDecimal.ONE, -1, "A"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
