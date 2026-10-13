@@ -153,4 +153,39 @@ class CarritoTest {
             assertThat(carrito.total()).isEqualByComparingTo("20.33");
         }
     }
+
+    @Nested
+    @Tag("HU02-CA06")
+    @DisplayName("HU02-CA06 La cantidad se ajusta al rango de 1 a 99")
+    class LimitesDeCantidad {
+
+        @ParameterizedTest(name = "pedir {0} unidades deja {1} en el carrito")
+        @CsvSource({"-5, 1", "0, 1", "1, 1", "98, 98", "99, 99", "100, 99"})
+        @DisplayName("valores limite al agregar")
+        void ajustaAlAgregar(int pedida, int esperada) {
+            carrito.agregar(LLAVE_AJUSTABLE, pedida);
+
+            assertThat(carrito.lineas().get(0).cantidad()).isEqualTo(esperada);
+        }
+
+        @Test
+        @DisplayName("acumular unidades no supera el maximo de 99")
+        void acumularNoSuperaMaximo() {
+            carrito.agregar(LLAVE_AJUSTABLE, 60);
+            carrito.agregar(LLAVE_AJUSTABLE, 60);
+
+            assertThat(carrito.lineas().get(0).cantidad()).isEqualTo(Carrito.CANTIDAD_MAXIMA);
+        }
+
+        @ParameterizedTest(name = "cambiar a {0} unidades deja {1}")
+        @CsvSource({"0, 1", "100, 99"})
+        @DisplayName("valores limite al cambiar la cantidad")
+        void ajustaAlCambiar(int pedida, int esperada) {
+            carrito.agregar(LLAVE_AJUSTABLE, 5);
+
+            carrito.cambiarCantidad("Adjustable Wrench", pedida);
+
+            assertThat(carrito.lineas().get(0).cantidad()).isEqualTo(esperada);
+        }
+    }
 }
