@@ -1,5 +1,6 @@
 package com.toolshop.carrito;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.Objects;
  * Las lineas se guardan por nombre de producto y conservan el orden en que se agregaron.
  */
 public class Carrito {
+
+    private static final BigDecimal CERO = BigDecimal.ZERO.setScale(2);
 
     private final Map<String, LineaCarrito> lineas = new LinkedHashMap<>();
 
@@ -35,5 +38,17 @@ public class Carrito {
 
     public boolean estaVacio() {
         return lineas.isEmpty();
+    }
+
+    /** Suma de los subtotales de todas las lineas, antes de descuentos (HU02-CA02). */
+    public BigDecimal subtotal() {
+        return lineas.values().stream()
+                .map(LineaCarrito::subtotal)
+                .reduce(CERO, BigDecimal::add);
+    }
+
+    /** Total a pagar. */
+    public BigDecimal total() {
+        return subtotal();
     }
 }
